@@ -7,6 +7,8 @@ local function select_backend(txn)
 
     local elec_prices = { ['fi1'] = 308.1, ['de1'] = 50 }
     local cheapest = get_min_price(elec_prices)
+    cheapest = call_api()
+    core.log(core.debug, "DONE WITH CALL API")
 
     -- Loop through all the backends. You could change this
     -- so that the backend names are passed into the function too.
@@ -33,6 +35,7 @@ local function select_backend(txn)
         end
 
         if backend_name == cheapest then
+            core.log(core.debug, "FOUND CHEAPEST, RETURNING...")
             return backend.name
         end
     end
@@ -53,6 +56,21 @@ function get_min_price(t)
         end
     end
     return key
+end
+
+function call_api()
+    core.log(core.debug, "CALL API")
+    local http = require("socket.http")
+    --local cjson = require("cjson")
+    local requestString = "http://host.docker.internal:9000"
+    local body, code = http.request(requestString)
+    if body == nil then
+        body = "EMPTY BODY"
+    end
+    core.log(core.debug, body)
+    -- TODO: response body is not json
+    -- local jsonDict = cjson.decode(body)
+    return body
 end
 
 core.register_fetches('selected_backend', select_backend)
