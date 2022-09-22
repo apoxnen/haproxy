@@ -9,4 +9,4 @@ COPY . .
 
 ENV FLASK_APP=src/main.py
 
-CMD [ "python", "-m" , "flask", "run", "--host=0.0.0.0"]
+CMD [ "python", "-u", "-m", "flask", "run", "--host=0.0.0.0"]
