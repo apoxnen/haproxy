@@ -1,5 +1,10 @@
 services:
-
+  haproxy:
+    image: my-haproxy
+    networks:
+      - haproxy_network1
+    ports:
+      - '8000:5000'
   fi1: 
     image: python-server1
     ports:
@@ -12,3 +17,8 @@ services:
     image: python-server2
     ports:
       - '5005:5000'
+
+networks:
+  haproxy_network1:
+    name: haproxy_network1
+    external: true
