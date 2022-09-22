@@ -8,10 +8,15 @@ services:
     ports:
       - '8001:8001'
   web:
-    build: .
+    image: steadybreeze-api
     ports:
-    - "9000:5000"
-    volumes:
-    - ./:/src
+      - "9000:5000"
     depends_on:
-    - redis
+      - redis
+    networks:
+      - haproxy_network1
+
+networks:
+  haproxy_network1:
+    name: haproxy_network1
+    external: true

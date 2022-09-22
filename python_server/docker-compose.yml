@@ -1,0 +1,14 @@
+services:
+
+  fi1: 
+    image: python-server1
+    ports:
+      - '5000:5000'
+  fi2: 
+    image: python-server-fi2
+    ports:
+      - '4040:5000'
+  de1: 
+    image: python-server2
+    ports:
+      - '5005:5000'
