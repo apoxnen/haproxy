@@ -1,6 +1,7 @@
 flask
 redis
 apscheduler
+entsoe-py
 fmiopendata==0.3.4
 matplotlib==3.5.2
 numpy==1.22.3

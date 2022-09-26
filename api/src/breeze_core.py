@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from fmiopendata.wfs import download_stored_query
+from entsoe import EntsoePandasClient
 
 """
 This library contains the most critical functions for forecasting wind production,
@@ -13,6 +14,7 @@ API accesses etc.
 """
 
 FINGRID_API_KEY = "i7AbaUazlB7XPaVkbrGNh7G1SEhIgDZ68pSt2EaT"
+ENTSOE_API_KEY = "32315fb3-eac5-48b3-a08b-b7514c875395"
 
 def power_curve(wind_speed, max_power=4200):
     """
@@ -374,4 +376,40 @@ def get_customer_prices(power_list, capacity_lim=0.6, max_cap=4200, low_price=0.
             prices.append(low_price * p)
         else:
             prices.append(high_price * p)
+    return prices
+
+def get_entsoe_day_ahead_prices(start_time=dt.now(), days=2, country_code='FI'):
+    """
+    Retrieves the day ahead prices for the given country code from ENTSOE's API.
+    NOTE: Returns the values in the local timezone.
+
+    Parameters
+    ----------
+    start_time: datetime.datetime, optional
+        the starting hour of the list (default is now)
+    hours: int, optional
+        the number of hours to include in the return object (default is 24)
+    country_code: string, optional
+        Country code for which to get the prices
+
+    Returns
+    -------
+    pandas series 
+        a Pandas Series of day-ahead prices in the local timezone.
+    """
+    if start_time > dt.now():
+        print("INVALID DATE RANGE")
+        return pd.Series()
+
+    client = EntsoePandasClient(api_key="32315fb3-eac5-48b3-a08b-b7514c875395")
+
+    end_time = start_time + timedelta(days=days)
+    start_str = start_time.strftime("%Y%m%d")
+    end_str = end_time.strftime("%Y%m%d")
+    #Accra time used here because it is GMT+0 always. All API responses are in CET/CEST.
+    formatted_start_time = pd.Timestamp(start_str, tz='Africa/Accra')
+    formatted_end_time = pd.Timestamp(end_str, tz='Africa/Accra')
+
+    prices = client.query_day_ahead_prices(country_code, start=formatted_start_time,end=formatted_end_time)
+    print(prices)
     return prices

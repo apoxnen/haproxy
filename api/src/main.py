@@ -1,5 +1,6 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime as dt
 import breeze_core
 import redis
 import json
@@ -13,6 +14,16 @@ def update_elec_data():
     Function for updating the data in Redis.
     """
     print("Scheduler is alive!")
+
+    # First process SPOT data
+    spot_prices_fi = breeze_core.get_entsoe_day_ahead_prices(country_code='FI')
+    spot_prices_de = breeze_core.get_entsoe_day_ahead_prices(country_code='DE_LU')
+    spot_prices_dk = breeze_core.get_entsoe_day_ahead_prices(country_code='DK_1')
+
+    # Current SPOT prices
+    spot_price_fi1 = spot_prices_fi[dt.now().hour - 2]
+    spot_price_de1 = spot_prices_de[dt.now().hour - 2]
+
     total_fi1_cap = 40 #MW
     total_de1_cap = 40 #MW
 
@@ -27,10 +38,6 @@ def update_elec_data():
     # TODO: Get DC power consumption estimate here
     fi1_current_consumption = total_fi1_cap * 0.6
     de1_current_consumption = total_de1_cap * 0.5
-
-    # TODO: Get the rest of the electricity from NordPool
-    spot_price_fi1 = 261.49 # EUR/MWh, this is the mean value for aug 2022
-    spot_price_de1 = 200.49 # EUR/MWh, this is an imaginary value
 
     spot_consumption_fi1 = fi1_current_consumption - next_hour_ppa_fi1
     
@@ -50,11 +57,15 @@ def update_elec_data():
     
     # Save the data to redis as json:
     data = {}
-    data['fi1'] = {"total_price": fi1_total_price, "total_consumption": fi1_current_consumption}
-    data['de1'] = {"total_price": de1_total_price, "total_consumption": de1_current_consumption}
+    data['fi'] = {"total_price": fi1_total_price, "total_consumption": fi1_current_consumption}
+    data['de'] = {"total_price": de1_total_price, "total_consumption": de1_current_consumption}
     json_data = json.dumps(data)
     r.execute_command('JSON.SET', 'data', '.', json_data)
     print("Data saved to redis.")
+    r.execute_command('JSON.SET', 'spot_prices_fi', '.', spot_prices_fi.to_json(date_format='iso'))
+    r.execute_command('JSON.SET', 'spot_prices_de', '.', spot_prices_de.to_json(date_format='iso'))
+    print("SPOT price data saved to redis.")
+    print(spot_price_fi[0])
 
 sched = BackgroundScheduler(daemon=True)
 sched.add_job(update_elec_data,'interval',minutes=1)
