@@ -406,10 +406,9 @@ def get_entsoe_day_ahead_prices(start_time=dt.now(), days=2, country_code='FI'):
     end_time = start_time + timedelta(days=days)
     start_str = start_time.strftime("%Y%m%d")
     end_str = end_time.strftime("%Y%m%d")
-    #Accra time used here because it is GMT+0 always. All API responses are in CET/CEST.
+    # Accra time used here because it is GMT+0 always. All API responses are in CET/CEST.
     formatted_start_time = pd.Timestamp(start_str, tz='Africa/Accra')
     formatted_end_time = pd.Timestamp(end_str, tz='Africa/Accra')
 
     prices = client.query_day_ahead_prices(country_code, start=formatted_start_time,end=formatted_end_time)
-    print(prices)
     return prices
