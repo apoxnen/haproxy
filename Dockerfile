@@ -14,5 +14,8 @@ RUN mkdir /var/lib/haproxy/dev/log
 
 RUN luarocks install luasocket
 RUN luarocks install lua-cjson
+RUN luarocks install redis-lua
 
+RUN mkdir /usr/local/share/lua/5.3
+COPY /usr/local/share/lua/5.1/redis.lua /usr/local/share/lua/5.3/redis.lua
 COPY test_load.sh test_load.sh
