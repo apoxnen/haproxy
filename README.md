@@ -2,6 +2,12 @@
 
 This repo contains modifications made to HAProxy load balancer with the goal of allowing the consideration of electricity prices / market when allocating resources across multiple different electricity price regions.
 
+In practice Haproxy is ran in a Docker container. Using a custom Lua script and configuration, the Haproxy instance fetches electricity price information from a local Redis instance that is ran in a separate Docker container. The information in the Redis instance is updated periodically using the API in the api/ folder of the repo. This also exists as a separate container.
+
+In addition to these three containers, the repository also contains a python_server folder that can be used to easily spawn multiple servers. These can be configured to the Haproxy instance to be used as mock servers between which the Haproxy instance balances the load. This is done in the haproxy.cfg file.
+
+Once all the containers are running and the configurations up-to-date, the load balancing can be verified using the test_load.sh script.
+
 ## Getting Started
 First download Docker and run the commands below on the host machine (powershell or terminal). If no errors occurred, the HAProxy server should be visible in localhost:8000
 
